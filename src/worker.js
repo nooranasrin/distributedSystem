@@ -12,22 +12,28 @@ const informWorkerFree = function ({ id, tags }) {
   const options = getWorkerOptions();
   options.path = `/job-completed/${id}`;
   const req = http.request(options, (res) => {});
+  req.write(JSON.stringify(tags));
   req.end();
 };
 
 app.use((req, res, next) => {
-  console.time(`${req.method}, ${req.url}`);
+  console.log(`${req.method}, ${req.url}`);
   next();
 });
 
-app.post('/process/:id/:count/:width/:height/:tags', (req, res) => {
+app.post('/process', (req, res) => {
+  let data = '';
+  req.on('data', (chunk) => (data += chunk));
+  req.on('end', () => {
+    const params = JSON.parse(data);
+    processImage(params)
+      .then((tags) => {
+        console.log(tags);
+        return { id: params.id, tags };
+      })
+      .then(informWorkerFree);
+  });
   res.end();
-  processImage(req.params)
-    .then((tags) => {
-      console.log(tags);
-      return { id: req.id, tags };
-    })
-    .then(informWorkerFree);
 });
 
 app.listen(PORT, () => console.log(`server started listening on port ${PORT}`));
