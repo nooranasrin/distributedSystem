@@ -8,7 +8,11 @@ class Scheduler {
   }
 
   schedule(job) {
-    this.jobs.push(job);
+    if (this.isWorkerFree) {
+      this.delegateToWorker(job);
+    } else {
+      this.jobs.push(job);
+    }
   }
 
   delegateToWorker(data) {
@@ -21,18 +25,12 @@ class Scheduler {
     this.isWorkerFree = false;
   }
 
-  start() {
-    setInterval(() => {
-      if (this.isWorkerFree && this.jobs.length > 0) {
-        const job = this.jobs.shift();
-        console.log('Setting up worker for ', job.id);
-        this.delegateToWorker(job);
-      }
-    });
-  }
-
   setWorkerFree() {
     this.isWorkerFree = true;
+    if (this.jobs.length > 0) {
+      const job = this.jobs.shift();
+      this.delegateToWorker(job);
+    }
   }
 }
 

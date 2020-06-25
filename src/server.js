@@ -10,7 +10,11 @@ const getWorkerOptions = function () {
 const PORT = 8000;
 const imageSets = new ImageSets();
 const scheduler = new Scheduler(getWorkerOptions());
-scheduler.start();
+
+app.use((req, res, next) => {
+  console.log(`${req.method}, ${req.url}`);
+  next();
+});
 
 app.post('/job-completed/:id/', (req, res) => {
   let data = '';
@@ -25,11 +29,6 @@ app.post('/job-completed/:id/', (req, res) => {
 app.get('/status/:id', (req, res) => {
   const imageSet = imageSets.get(req.params.id);
   res.send(JSON.stringify(imageSet));
-});
-
-app.use((req, res, next) => {
-  console.log(`${req.method}, ${req.url}`);
-  next();
 });
 
 app.post('/process/:name/:count/:width/:height/:tags', (req, res) => {
