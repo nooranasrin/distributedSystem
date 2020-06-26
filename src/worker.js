@@ -2,7 +2,8 @@ const http = require('http');
 const express = require('express');
 const app = express();
 const processImage = require('./processImage');
-const PORT = 5000;
+const PORT = +process.argv[2] || 5000;
+const ID = +process.argv[3];
 
 const getWorkerOptions = function () {
   return { host: 'localhost', port: 8000, method: 'post' };
@@ -10,7 +11,7 @@ const getWorkerOptions = function () {
 
 const informWorkerFree = function ({ id, tags }) {
   const options = getWorkerOptions();
-  options.path = `/job-completed/${id}`;
+  options.path = `/job-completed/${id}/${ID}`;
   const req = http.request(options, (res) => {});
   req.write(JSON.stringify(tags));
   req.end();
@@ -36,4 +37,10 @@ app.post('/process', (req, res) => {
   res.end();
 });
 
-app.listen(PORT, () => console.log(`server started listening on port ${PORT}`));
+const main = function (id) {
+  app.listen(PORT, () =>
+    console.log(`server started listening on port ${PORT} and id is ${id}`)
+  );
+};
+
+main(ID);

@@ -12,18 +12,19 @@ const PORT = 8000;
 const imageSets = new ImageSets();
 const scheduler = new Scheduler();
 scheduler.addAgent(new Agent(1, getWorkerOptions(5000)));
+scheduler.addAgent(new Agent(2, getWorkerOptions(5001)));
 
 app.use((req, res, next) => {
   console.log(`${req.method}, ${req.url}`);
   next();
 });
 
-app.post('/job-completed/:id/', (req, res) => {
+app.post('/job-completed/:id/:ID', (req, res) => {
   let data = '';
   req.on('data', (chunk) => (data += chunk));
   req.on('end', () => {
     imageSets.completedProcessing(req.params.id, JSON.parse(data));
-    scheduler.setAgentFree(1);
+    scheduler.setAgentFree(+req.params.ID);
     res.end();
   });
 });
