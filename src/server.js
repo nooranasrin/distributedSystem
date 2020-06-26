@@ -2,14 +2,16 @@ const express = require('express');
 const app = express();
 const ImageSets = require('./imageSets');
 const Scheduler = require('./scheduler');
+const Agent = require('./agent');
 
-const getWorkerOptions = function () {
-  return { host: 'localhost', port: 5000, method: 'post', path: '/process' };
+const getWorkerOptions = function (port) {
+  return { host: 'localhost', port, method: 'post', path: '/process' };
 };
 
 const PORT = 8000;
 const imageSets = new ImageSets();
-const scheduler = new Scheduler(getWorkerOptions());
+const scheduler = new Scheduler();
+scheduler.addAgent(new Agent(1, getWorkerOptions(5000)));
 
 app.use((req, res, next) => {
   console.log(`${req.method}, ${req.url}`);
@@ -21,7 +23,7 @@ app.post('/job-completed/:id/', (req, res) => {
   req.on('data', (chunk) => (data += chunk));
   req.on('end', () => {
     imageSets.completedProcessing(req.params.id, JSON.parse(data));
-    scheduler.setWorkerFree();
+    scheduler.setAgentFree(1);
     res.end();
   });
 });
