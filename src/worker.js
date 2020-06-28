@@ -27,7 +27,7 @@ app.post('/process', (req, res) => {
   req.on('data', (chunk) => (data += chunk));
   req.on('end', () => {
     const params = JSON.parse(data);
-    processImage(params)
+    processImage(params.imageSet)
       .then((tags) => {
         console.log(tags);
         return { id: params.id, tags };
