@@ -5,7 +5,7 @@ const imageSets = require('./imageSets');
 const processImage = require('./processImage');
 
 const getWorkerOptions = function () {
-  return { host: 'localhost', port: 8000, method: 'get', path: '/request-job' };
+  return { host: 'localhost', port: 8001, method: 'get', path: '/request-job' };
 };
 
 const getJob = function () {
