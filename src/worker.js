@@ -12,11 +12,10 @@ const getWorkerOptions = function () {
   return { host: 'localhost', port: 8000, method: 'post' };
 };
 
-const informWorkerFree = function ({ id, tags }) {
+const informWorkerFree = function (id) {
   const options = getWorkerOptions();
   options.path = `/job-completed/${id}/${ID}`;
   const req = http.request(options, (res) => {});
-  req.write(JSON.stringify(tags));
   req.end();
 };
 
@@ -37,7 +36,7 @@ app.post('/process', (req, res) => {
           imageSets.completedProcessing(client, id, tags);
           return { id, tags };
         })
-        .then(informWorkerFree);
+        .then(() => informWorkerFree(id));
     });
   });
   res.end();
