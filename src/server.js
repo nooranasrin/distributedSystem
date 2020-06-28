@@ -21,13 +21,8 @@ app.use((req, res, next) => {
 });
 
 app.post('/job-completed/:id/:ID', (req, res) => {
-  let data = '';
-  req.on('data', (chunk) => (data += chunk));
-  req.on('end', () => {
-    imageSets.completedProcessing(client, req.params.id, JSON.parse(data));
-    scheduler.setAgentFree(+req.params.ID);
-    res.end();
-  });
+  scheduler.setAgentFree(+req.params.ID);
+  res.end();
 });
 
 app.get('/status/:id', (req, res) => {
@@ -37,10 +32,10 @@ app.get('/status/:id', (req, res) => {
 });
 
 app.post('/process/:name/:count/:width/:height/:tags', (req, res) => {
-  imageSets.addImageSet(client, req.params).then((job) => {
-    res.send(`id:${job.id}`);
+  imageSets.addImageSet(client, req.params).then((id) => {
+    res.send(`id:${id}`);
     res.end();
-    scheduler.schedule(job);
+    scheduler.schedule(id);
   });
 });
 

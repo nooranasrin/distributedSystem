@@ -1,6 +1,9 @@
 const http = require('http');
 const express = require('express');
 const app = express();
+const redis = require('redis');
+const client = redis.createClient({ db: 1 });
+const imageSets = require('./imageSets');
 const processImage = require('./processImage');
 const PORT = +process.argv[2] || 5000;
 const ID = +process.argv[3];
@@ -26,13 +29,16 @@ app.post('/process', (req, res) => {
   let data = '';
   req.on('data', (chunk) => (data += chunk));
   req.on('end', () => {
-    const params = JSON.parse(data);
-    processImage(params.imageSet)
-      .then((tags) => {
-        console.log(tags);
-        return { id: params.id, tags };
-      })
-      .then(informWorkerFree);
+    const id = JSON.parse(data);
+    imageSets.get(client, id).then((imageSet) => {
+      processImage(imageSet)
+        .then((tags) => {
+          console.log(tags);
+          imageSets.completedProcessing(client, id, tags);
+          return { id, tags };
+        })
+        .then(informWorkerFree);
+    });
   });
   res.end();
 });
